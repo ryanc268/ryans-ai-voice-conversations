@@ -333,7 +333,7 @@ const Chat: NextPage = () => {
       </main>
     </>
   ) : (
-    <ErrorPage></ErrorPage>
+    <ErrorPage/>
   );
 };
 

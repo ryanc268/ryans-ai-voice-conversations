@@ -2,9 +2,9 @@ import { type NextPage } from "next";
 import Head from "next/head";
 import { signIn, signOut, useSession } from "next-auth/react";
 
-import { api } from "~/utils/api";
 import Link from "next/link";
 import Image from "next/image";
+import ErrorPage from "./error";
 
 const Home: NextPage = () => {
   return (
@@ -49,7 +49,7 @@ const AuthShowcase: React.FC = () => {
       >
         {sessionData ? "Sign out" : "Sign in"}
       </button>
-      {sessionData && (
+      {sessionData ? (
         <Link
           className="m-4 text-center md:my-8 md:mx-16 md:scale-150"
           href="/chat"
@@ -63,6 +63,8 @@ const AuthShowcase: React.FC = () => {
             alt="Logo"
           />
         </Link>
+      ) : (
+        <ErrorPage />
       )}
     </div>
   );
