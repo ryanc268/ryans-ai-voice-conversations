@@ -11,6 +11,8 @@ import * as sdk from "microsoft-cognitiveservices-speech-sdk";
 
 import { api } from "~/utils/api";
 import { AIaus, AIeu, AIna, AIRegion, Chatter } from "~/utils/enums";
+import ErrorPage from "./error";
+import Link from "next/link";
 
 const Chat: NextPage = () => {
   const TEXTAREA_COLS = 100;
@@ -38,6 +40,8 @@ const Chat: NextPage = () => {
   const scrollBottomRef = useRef<HTMLDivElement | null>(null);
 
   const aiResponse = api.response.respond.useMutation();
+
+  const { data: userData, isError: isUserError } = api.user.me.useQuery();
 
   const sendData = async (voiceMessage?: string) => {
     setMessageHistory((m) => [...m, [Chatter.HUMAN, voiceMessage || message]]);
@@ -165,20 +169,33 @@ const Chat: NextPage = () => {
     } else speechRecognizer.current && speechRecognizer.current.close();
   }, [isRecording]);
 
-  return (
+  return userData && !isUserError ? (
     <>
       <Head>
         <title>Ryans AI Convos</title>
-        <meta name="description" content="Voice chat with an AI about anything!" />
+        <meta
+          name="description"
+          content="Voice chat with an AI about anything!"
+        />
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="fixed h-full w-full bg-gradient-to-b from-[#1b1b1b] to-[#020e18]">
         <div className="relative flex h-full flex-col items-center gap-2 rounded-lg border px-4 py-4 text-slate-200 md:mx-auto md:w-1/2">
-          <a
-            className="absolute top-0 right-0 m-4 text-center md:m-8 md:scale-150"
-            href="https://www.ryancoppa.com"
+          <div className="absolute top-0 left-0 m-4 text-center md:my-8 md:mx-16 md:scale-150">
+            <h4 className="scale-90 text-xs">{userData.name}</h4>
+            <Image
+              className="m-auto w-8 rounded-full"
+              src={userData.image || ""}
+              width={40}
+              height={40}
+              alt="Logo"
+            />
+          </div>
+          <Link
+            className="absolute top-0 right-0 m-4 text-center md:my-8 md:mx-16 md:scale-150"
+            href="/"
           >
-            <h4 className="scale-90 text-xs">Portfolio</h4>
+            <h4 className="scale-90 text-xs">Home</h4>
             <Image
               className="m-auto w-8"
               src="/favicon.ico"
@@ -186,7 +203,7 @@ const Chat: NextPage = () => {
               height={40}
               alt="Logo"
             />
-          </a>
+          </Link>
           <div className="flex flex-col text-center">
             <h2 className="text-xl md:text-4xl">Text / Voice Chat With AI</h2>
             <h2 className="text-sm md:text-base">By Ryan Coppa</h2>
@@ -256,7 +273,7 @@ const Chat: NextPage = () => {
               <div key={i} className="flex">
                 <h2 className="w-12 p-1 ">{m[0]}</h2>
                 <div
-                  className={`font-montserrat my-1 w-full whitespace-pre-wrap rounded-lg bg-opacity-25 px-6 text-left ${
+                  className={`my-1 w-full whitespace-pre-wrap rounded-lg bg-opacity-25 px-6 text-left font-montserrat ${
                     m[0] === Chatter.HUMAN ? "bg-cyan-custom" : "bg-cyan-900"
                   }`}
                   key={i}
@@ -315,6 +332,8 @@ const Chat: NextPage = () => {
         </div>
       </main>
     </>
+  ) : (
+    <ErrorPage></ErrorPage>
   );
 };
 

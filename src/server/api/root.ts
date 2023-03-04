@@ -1,6 +1,7 @@
 import { createTRPCRouter } from "~/server/api/trpc";
 import { exampleRouter } from "~/server/api/routers/example";
 import { aiResponseRouter } from "./routers/aiResponse";
+import { userRouter } from "./routers/user";
 
 /**
  * This is the primary router for your server.
@@ -9,6 +10,7 @@ import { aiResponseRouter } from "./routers/aiResponse";
  */
 export const appRouter = createTRPCRouter({
   example: exampleRouter,
+  user: userRouter,
   response: aiResponseRouter,
 });
 
