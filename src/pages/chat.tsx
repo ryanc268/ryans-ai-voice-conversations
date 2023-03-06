@@ -13,11 +13,13 @@ import { api } from "~/utils/api";
 import { AIaus, AIeu, AIna, AIRegion, Chatter } from "~/utils/enums";
 import ErrorPage from "./error";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 
 const Chat: NextPage = () => {
   const TEXTAREA_COLS = 100;
   const TEXTAREA_ROWS = 2;
   const HISTORY_LIMIT = 50;
+  const MINIMUM_CHAT_TOKENS = 100;
 
   const SPEECH_CONFIG = sdk.SpeechConfig.fromSubscription(
     process.env.NEXT_PUBLIC_SPEECH_KEY as string,
@@ -30,6 +32,7 @@ const Chat: NextPage = () => {
   const [convoId, setConvoId] = useState<string | undefined>("");
   const [voiceRegion, setVoiceRegion] = useState<string>("NA");
   const [voiceType, setVoiceType] = useState<string>("en-US-AmberNeural");
+  const [chatTokens, setChatTokens] = useState<number>();
 
   const [messageHistory, setMessageHistory] = useState<[Chatter, string][]>([]);
 
@@ -39,9 +42,21 @@ const Chat: NextPage = () => {
 
   const scrollBottomRef = useRef<HTMLDivElement | null>(null);
 
+  const didLoad = useRef<boolean>(false);
+
   const aiResponse = api.response.respond.useMutation();
 
-  const { data: userData, isError: isUserError } = api.user.me.useQuery();
+  const { data: sessionData } = useSession();
+
+  const { data: tokens } = api.user.getTokens.useQuery();
+
+  const updateTokens = api.user.updateTokens.useQuery(
+    { tokens: chatTokens }
+    // {
+    //   refetchOnWindowFocus: false,
+    //   enabled: false,
+    // }
+  );
 
   const sendData = async (voiceMessage?: string) => {
     setMessageHistory((m) => [...m, [Chatter.HUMAN, voiceMessage || message]]);
@@ -53,6 +68,13 @@ const Chat: NextPage = () => {
     });
     setMessage("");
     setSendAllowed(false);
+  };
+
+  const subtractTokens = () => {
+    if (tokens) {
+      const usage = 50;
+      setChatTokens(tokens.chatTokens - usage);
+    }
   };
 
   const validateTextArea = (e: ChangeEvent<HTMLTextAreaElement>) => {
@@ -143,7 +165,12 @@ const Chat: NextPage = () => {
   };
 
   useEffect(() => {
+    setChatTokens(tokens?.chatTokens as number);
+  }, [tokens?.chatTokens]);
+
+  useEffect(() => {
     if (aiResponse.data) {
+      subtractTokens();
       setMessageHistory((m) => [...m, [Chatter.AI, aiResponse.data.text]]);
       setParentId(aiResponse.data.parentId);
       setConvoId(aiResponse.data.convoId);
@@ -169,7 +196,7 @@ const Chat: NextPage = () => {
     } else speechRecognizer.current && speechRecognizer.current.close();
   }, [isRecording]);
 
-  return userData && !isUserError ? (
+  return sessionData ? (
     <>
       <Head>
         <title>Ryans AI Convos</title>
@@ -181,11 +208,14 @@ const Chat: NextPage = () => {
       </Head>
       <main className="fixed h-full w-full bg-gradient-to-b from-[#1b1b1b] to-[#020e18]">
         <div className="relative flex h-full flex-col items-center gap-2 rounded-lg border px-4 py-4 text-slate-200 md:mx-auto md:w-1/2">
-          <div className="absolute top-0 left-0 m-4 text-center md:my-8 md:mx-16 md:scale-150">
-            <h4 className="scale-90 text-xs">{userData.name}</h4>
+          <div className="absolute top-0 left-0 m-2 rounded-lg bg-zinc-800 p-1 text-center md:my-8 md:mx-16 md:scale-150 md:p-2">
+            <h4 className="scale-90 text-xs">{sessionData.user?.name}</h4>
+            <h4 className="scale-75 text-xs">
+              Tokens: {tokens?.chatTokens || 0}
+            </h4>
             <Image
               className="m-auto w-8 rounded-full"
-              src={userData.image || ""}
+              src={sessionData.user?.image || ""}
               width={40}
               height={40}
               alt="Logo"
@@ -255,19 +285,26 @@ const Chat: NextPage = () => {
               </select>
             </div>
           </div>
-          <button
-            className={`flex items-center justify-center rounded-lg border py-2 px-4 hover:bg-violet-900 ${
-              isRecording ? "border-red-600" : ""
-            }`}
-            onClick={() => setIsRecording((r) => !r)}
-          >
-            {isRecording ? "Stop" : "Start"} Recording
-            <FontAwesomeIcon
-              className="w-6 pl-2"
-              color={isRecording ? "rgb(220 38 38)" : ""}
-              icon={faMicrophone}
-            />
-          </button>
+          {tokens && tokens.chatTokens >= MINIMUM_CHAT_TOKENS ? (
+            <button
+              className={`flex items-center justify-center rounded-lg border py-2 px-4 hover:bg-violet-900 ${
+                isRecording ? "border-red-600" : ""
+              }`}
+              onClick={() => setIsRecording((r) => !r)}
+            >
+              {isRecording ? "Stop" : "Start"} Recording
+              <FontAwesomeIcon
+                className="w-6 pl-2"
+                color={isRecording ? "rgb(220 38 38)" : ""}
+                icon={faMicrophone}
+              />
+            </button>
+          ) : (
+            <h3 className="text-center text-lg text-red-600 md:text-3xl">
+              Not Enough Tokens Left, Please Buy More or Contact The Developer.
+              (Minimum {MINIMUM_CHAT_TOKENS})
+            </h3>
+          )}
           <div className="my-2 w-5/6 overflow-y-auto rounded-lg text-sm md:text-base">
             {messageHistory.map((m, i) => (
               <div key={i} className="flex">
@@ -300,40 +337,44 @@ const Chat: NextPage = () => {
             )}
             <div ref={scrollBottomRef}></div>
           </div>
-          <textarea
-            className="mt-auto h-12 w-5/6 resize-none rounded-lg border bg-transparent p-2 text-sm md:h-20"
-            placeholder="Enter your prompt..."
-            spellCheck="false"
-            value={message}
-            rows={TEXTAREA_ROWS}
-            cols={TEXTAREA_COLS}
-            maxLength={TEXTAREA_COLS * TEXTAREA_ROWS}
-            onChange={validateTextArea}
-            onKeyUp={checkSubmit}
-          />
-          <div className="my-2 flex w-full justify-evenly md:text-xl">
-            <button
-              className="rounded-lg border px-6 py-2 hover:bg-violet-900 disabled:opacity-25 disabled:hover:bg-transparent"
-              // eslint-disable-next-line @typescript-eslint/no-misused-promises
-              onClick={() => sendData()}
-              type="submit"
-              disabled={aiResponse.isLoading || !sendAllowed}
-            >
-              Send
-            </button>
-            <button
-              className="rounded-lg border px-6 py-2 hover:bg-violet-900 disabled:opacity-25 disabled:hover:bg-transparent"
-              onClick={clearTextArea}
-              disabled={aiResponse.isLoading}
-            >
-              Clear
-            </button>
-          </div>
+          {tokens && tokens.chatTokens >= MINIMUM_CHAT_TOKENS && (
+            <>
+              <textarea
+                className="mt-auto h-12 w-5/6 resize-none rounded-lg border bg-transparent p-2 text-sm md:h-20"
+                placeholder="Enter your prompt..."
+                spellCheck="false"
+                value={message}
+                rows={TEXTAREA_ROWS}
+                cols={TEXTAREA_COLS}
+                maxLength={TEXTAREA_COLS * TEXTAREA_ROWS}
+                onChange={validateTextArea}
+                onKeyUp={checkSubmit}
+              />
+              <div className="my-2 flex w-full justify-evenly md:text-xl">
+                <button
+                  className="rounded-lg border px-6 py-2 hover:bg-violet-900 disabled:opacity-25 disabled:hover:bg-transparent"
+                  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+                  onClick={() => sendData()}
+                  type="submit"
+                  disabled={aiResponse.isLoading || !sendAllowed}
+                >
+                  Send
+                </button>
+                <button
+                  className="rounded-lg border px-6 py-2 hover:bg-violet-900 disabled:opacity-25 disabled:hover:bg-transparent"
+                  onClick={clearTextArea}
+                  disabled={aiResponse.isLoading}
+                >
+                  Clear
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </main>
     </>
   ) : (
-    <ErrorPage/>
+    <ErrorPage />
   );
 };
 

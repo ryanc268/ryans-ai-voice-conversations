@@ -4,7 +4,6 @@ import { signIn, signOut, useSession } from "next-auth/react";
 
 import Link from "next/link";
 import Image from "next/image";
-import ErrorPage from "./error";
 
 const Home: NextPage = () => {
   return (
@@ -20,6 +19,15 @@ const Home: NextPage = () => {
 
       <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#1b1b1b] to-[#020e18]">
         <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
+          <div className="absolute top-0 left-0 flex w-full items-center justify-center bg-zinc-800 p-2 text-center text-sm text-white md:p-4 md:text-lg">
+            <h4>
+              Want to see more of my work? Click{" "}
+              <a className="text-cyan-custom" href="https:www.ryancoppa.com">
+                here
+              </a>{" "}
+              to see my Portfolio!
+            </h4>
+          </div>
           <h1 className="text-2xl text-white sm:text-[5rem]">
             Ryan&apos;s <span className="text-cyan-custom">AI Voice</span>{" "}
             Conversations App
@@ -49,7 +57,7 @@ const AuthShowcase: React.FC = () => {
       >
         {sessionData ? "Sign out" : "Sign in"}
       </button>
-      {sessionData ? (
+      {sessionData && (
         <Link
           className="m-4 text-center md:my-8 md:mx-16 md:scale-150"
           href="/chat"
@@ -63,8 +71,6 @@ const AuthShowcase: React.FC = () => {
             alt="Logo"
           />
         </Link>
-      ) : (
-        <ErrorPage />
       )}
     </div>
   );
