@@ -5,7 +5,7 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import Image from "next/image";
 
-import azureCognitive from "/public/Microsoft-Azure-Cognitive-Services.png";
+import azureCognitive from "/public/microsoft_cognitive_banner.png";
 import gptBanner from "/public/chatgpt_banner.png";
 
 const Home: NextPage = () => {

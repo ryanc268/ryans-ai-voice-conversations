@@ -31,7 +31,7 @@ const Chat: NextPage = () => {
   const [parentId, setParentId] = useState<string>("");
   const [convoId, setConvoId] = useState<string | undefined>("");
   const [voiceRegion, setVoiceRegion] = useState<string>("NA");
-  const [voiceType, setVoiceType] = useState<string>("en-US-AmberNeural");
+  const [voiceType, setVoiceType] = useState<string>("en-US-DavisNeural");
   const [chatTokens, setChatTokens] = useState<number>();
 
   // TODO: Add tokens used per response?
