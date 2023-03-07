@@ -27,7 +27,8 @@ export const aiResponseRouter = createTRPCRouter({
 const fetchResponse = async (
   input: Omit<GPTConvo, "voice" | "tokensUsed">
 ): Promise<Omit<GPTConvo, "voiceType">> => {
-  // @ts-expect-error weird issue with the latest version of ChatGPT compiling
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   const res = await API.sendMessage(input.text, {
     timeoutMs: 20000,
     conversationId: input.convoId,
