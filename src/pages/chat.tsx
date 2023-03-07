@@ -34,6 +34,7 @@ const Chat: NextPage = () => {
   const [voiceType, setVoiceType] = useState<string>("en-US-AmberNeural");
   const [chatTokens, setChatTokens] = useState<number>();
 
+  // TODO: Add tokens used per response?
   const [messageHistory, setMessageHistory] = useState<[Chatter, string][]>([]);
 
   const [isRecording, setIsRecording] = useState<boolean>();

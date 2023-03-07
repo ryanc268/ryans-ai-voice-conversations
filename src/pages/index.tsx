@@ -22,9 +22,9 @@ const Home: NextPage = () => {
           <div className="absolute top-0 left-0 flex w-full items-center justify-center bg-zinc-800 p-2 text-center text-sm text-white md:p-4 md:text-lg">
             <h4>
               Want to see more of my work? Click{" "}
-              <a className="text-cyan-custom" href="https:www.ryancoppa.com">
+              <Link className="text-cyan-custom" href="https://www.ryancoppa.com">
                 here
-              </a>{" "}
+              </Link>{" "}
               to see my Portfolio!
             </h4>
           </div>
