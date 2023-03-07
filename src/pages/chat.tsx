@@ -48,13 +48,17 @@ const Chat: NextPage = () => {
   const { data: sessionData } = useSession();
 
   const { data: tokens, isLoading: tokensLoading } =
-    api.user.getTokens.useQuery();
+    api.user.getTokens.useQuery(undefined, {
+      onSuccess(data) {
+        setChatTokens(data?.chatTokens);
+      },
+    });
 
-  const updateTokens = api.user.updateTokens.useQuery(
+  const { refetch: updateTokens } = api.user.updateTokens.useQuery(
     { tokens: chatTokens },
     {
-      // refetchOnWindowFocus: false,
-      // enabled: false,
+      refetchOnWindowFocus: false,
+      enabled: false,
       onSuccess(data) {
         setChatTokens(data.chatTokens);
       },
@@ -161,18 +165,20 @@ const Chat: NextPage = () => {
   };
 
   useEffect(() => {
-    setChatTokens(tokens?.chatTokens as number);
-  }, [tokens?.chatTokens]);
-
-  useEffect(() => {
     if (aiResponse.data) {
-      setChatTokens((t) => (t as number) - aiResponse.data.tokensUsed);
+      setChatTokens(
+        (tokens?.chatTokens as number) - aiResponse.data.tokensUsed
+      );
       setMessageHistory((m) => [...m, [Chatter.AI, aiResponse.data.text]]);
       setParentId(aiResponse.data.parentId);
       setConvoId(aiResponse.data.convoId);
       playBuffer(aiResponse.data.voice);
     }
   }, [aiResponse.data]);
+
+  useEffect(() => {
+    void updateTokens();
+  }, [chatTokens]);
 
   //This one is tricky because if we don't wait for parentId to change, we can skip the beginning of the convo by not using the updated value
   useEffect(() => {
@@ -218,7 +224,9 @@ const Chat: NextPage = () => {
             <div className="relative flex h-full flex-col items-center gap-2 rounded-lg border px-4 py-4 text-slate-200 md:mx-auto md:w-1/2">
               <div className="absolute top-0 left-0 m-2 rounded-lg bg-zinc-800 p-1 text-center md:my-8 md:mx-16 md:scale-150 md:p-2">
                 <h4 className="scale-90 text-xs">{sessionData.user?.name}</h4>
-                <h4 className="scale-75 text-xs">Tokens: {chatTokens}</h4>
+                <h4 className="scale-75 text-xs">
+                  {chatTokens ? `Tokens : ${chatTokens}` : "Calculating..."}
+                </h4>
                 <Image
                   className="m-auto w-8 rounded-full"
                   src={sessionData.user?.image || ""}
