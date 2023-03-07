@@ -19,7 +19,7 @@ specifiers:
   '@typescript-eslint/eslint-plugin': ^5.53.0
   '@typescript-eslint/parser': ^5.53.0
   autoprefixer: ^10.4.7
-  chatgpt: ^4.7.2
+  chatgpt: ^5.0.7
   eslint: ^8.34.0
   eslint-config-next: ^13.2.1
   microsoft-cognitiveservices-speech-sdk: ^1.25.1
@@ -28,7 +28,7 @@ specifiers:
   postcss: ^8.4.14
   prettier: ^2.8.1
   prettier-plugin-tailwindcss: ^0.2.1
-  prisma: ^4.9.0
+  prisma: ^4.11.0
   react: 18.2.0
   react-dom: 18.2.0
   react-loader-spinner: ^5.3.4
@@ -48,7 +48,7 @@ dependencies:
   '@trpc/next': 10.14.0_pen7abxfhplw6oyjl4mz6sok3y
   '@trpc/react-query': 10.14.0_ewqbv5apgvis5mngp6qivio3iy
   '@trpc/server': 10.14.0
-  chatgpt: 4.8.3
+  chatgpt: 5.0.7
   microsoft-cognitiveservices-speech-sdk: 1.25.1
   next: 13.2.3_biqbaboplfbrettd7655fr4n2y
   next-auth: 4.20.1_nvzgbose6yf6w7ijjprgspqefi
@@ -1158,8 +1158,8 @@ packages:
       supports-color: 7.2.0
     dev: true
 
-  /chatgpt/4.8.3:
-    resolution: {integrity: sha512-3kJ41a+E6aAnw4NZQgjoS8s3veu8mdaK1e0l6nX5Zr+QJre8KXygNUJJ8yPOCKBi26I3YZ1MdU+d1+QLuWrmAw==}
+  /chatgpt/5.0.7:
+    resolution: {integrity: sha512-wy69++JDNS0xKi+6rP+HDOByXBafQIVynHnlQw09apuDntGSKfwBRY902N8Q7/ZFU/XET+8NpJiio2iI69IWYw==}
     engines: {node: '>=14'}
     hasBin: true
     dependencies:

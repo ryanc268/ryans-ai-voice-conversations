@@ -3,7 +3,7 @@ import { ChatGPTAPI } from "chatgpt";
 import * as sdk from "microsoft-cognitiveservices-speech-sdk";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
-import { type GPTConvo } from "~/utils/interfaces";
+import { type GPTDetail, type GPTConvo } from "~/utils/interfaces";
 
 const API = new ChatGPTAPI({
   apiKey: process.env.OPENAI_API_KEY as string,
@@ -25,7 +25,7 @@ export const aiResponseRouter = createTRPCRouter({
 });
 
 const fetchResponse = async (
-  input: Omit<GPTConvo, "voice">
+  input: Omit<GPTConvo, "voice" | "tokensUsed">
 ): Promise<Omit<GPTConvo, "voiceType">> => {
   const res = await API.sendMessage(input.text, {
     timeoutMs: 20000,
@@ -34,11 +34,14 @@ const fetchResponse = async (
   });
   console.log("Input Received:", input);
   console.log("Output Returned:", res.text);
+  const detail = res.detail as GPTDetail;
+  console.log("Tokens Used:", detail.usage.total_tokens);
   const buffer = await speechSynthesis(res.text, input.voiceType);
   const uint8Array = new Uint8Array(buffer);
   const serializedData = JSON.stringify(Array.from(uint8Array));
   return {
     text: res.text,
+    tokensUsed: Math.ceil(detail.usage.total_tokens * 1.5),
     parentId: res.id,
     convoId: res.conversationId,
     voice: serializedData,
