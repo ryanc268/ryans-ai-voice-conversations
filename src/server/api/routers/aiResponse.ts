@@ -27,11 +27,13 @@ export const aiResponseRouter = createTRPCRouter({
 const fetchResponse = async (
   input: Omit<GPTConvo, "voice" | "tokensUsed">
 ): Promise<Omit<GPTConvo, "voiceType">> => {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
   const res = await API.sendMessage(input.text, {
     timeoutMs: 20000,
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     conversationId: input.convoId,
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     parentMessageId: input.parentId,
   });
   console.log("Input Received:", input);
