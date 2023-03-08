@@ -222,7 +222,7 @@ const Chat: NextPage = () => {
         ) : (
           <>
             <div className="relative flex h-full flex-col items-center gap-2 rounded-lg border px-4 py-4 text-slate-200 md:mx-auto md:w-1/2">
-              <div className="absolute top-0 left-0 m-2 rounded-lg bg-zinc-800 p-1 text-center md:my-8 md:mx-16 md:scale-150 md:p-2">
+              <div className="absolute top-0 left-0 m-2 rounded-lg bg-zinc-800 p-1 text-center 2xl:my-8 2xl:mx-16 2xl:scale-150 md:p-2">
                 <h4 className="scale-90 text-xs">{sessionData.user?.name}</h4>
                 <h4 className="scale-75 text-xs">
                   {chatTokens ? `Tokens : ${chatTokens}` : "Calculating..."}
@@ -236,7 +236,7 @@ const Chat: NextPage = () => {
                 />
               </div>
               <Link
-                className="absolute top-0 right-0 m-4 text-center md:my-8 md:mx-16 md:scale-150"
+                className="absolute top-0 right-0 m-4 text-center 2xl:my-8 2xl:mx-16 2xl:scale-150"
                 href="/"
               >
                 <h4 className="scale-90 text-xs">Home</h4>

@@ -109,7 +109,7 @@ const AuthShowcase: React.FC = () => {
       </button>
       {sessionData && (
         <Link
-          className="m-4 text-center md:my-8 md:mx-16 md:scale-150"
+          className="m-4 text-center md:my-8 md:mx-16 md:scale-125"
           href="/chat"
         >
           <h4 className="scale-90 text-xl text-white">Chat Now!</h4>
