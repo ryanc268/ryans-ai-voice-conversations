@@ -302,7 +302,7 @@ const Chat: NextPage = () => {
                   </select>
                 </div>
               </div>
-              {(chatTokens as number) >= MINIMUM_CHAT_TOKENS ? (
+              {chatTokens >= MINIMUM_CHAT_TOKENS ? (
                 <button
                   className={`flex items-center justify-center rounded-lg border py-2 px-4 hover:bg-violet-900 disabled:opacity-25 disabled:hover:bg-transparent ${
                     isRecording ? "border-red-600" : ""
@@ -323,7 +323,7 @@ const Chat: NextPage = () => {
                   Developer. (Minimum {MINIMUM_CHAT_TOKENS})
                 </h3>
               )}
-              {(chatTokens as number) >= MINIMUM_CHAT_TOKENS && (
+              {chatTokens >= MINIMUM_CHAT_TOKENS && (
                 <>
                   <div className="my-2 w-5/6 overflow-y-auto rounded-lg text-sm md:text-base">
                     {messageHistory.map((m, i) => (
