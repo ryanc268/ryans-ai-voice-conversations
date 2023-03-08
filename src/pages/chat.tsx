@@ -54,14 +54,10 @@ const Chat: NextPage = () => {
       },
     });
 
-  const { refetch: updateTokens } = api.user.updateTokens.useQuery(
+  const { data: updatedTokens } = api.user.updateTokens.useQuery(
     { tokens: chatTokens },
     {
       refetchOnWindowFocus: false,
-      enabled: false,
-      onSuccess(data) {
-        setChatTokens(data.chatTokens);
-      },
     }
   );
 
@@ -116,6 +112,11 @@ const Chat: NextPage = () => {
   const record = () => {
     const audioConfig = sdk.AudioConfig.fromDefaultMicrophoneInput();
 
+    //https://learn.microsoft.com/en-us/dotnet/api/microsoft.cognitiveservices.speech.propertyid?view=azure-dotnet
+    SPEECH_CONFIG.setProperty("Speech_SegmentationSilenceTimeoutMs", "1500");
+
+    console.log(SPEECH_CONFIG);
+
     speechRecognizer.current = new sdk.SpeechRecognizer(
       SPEECH_CONFIG,
       audioConfig
@@ -166,19 +167,13 @@ const Chat: NextPage = () => {
 
   useEffect(() => {
     if (aiResponse.data) {
-      setChatTokens(
-        (tokens?.chatTokens as number) - aiResponse.data.tokensUsed
-      );
+      setChatTokens((m) => (m as number) - aiResponse.data.tokensUsed);
       setMessageHistory((m) => [...m, [Chatter.AI, aiResponse.data.text]]);
       setParentId(aiResponse.data.parentId);
       setConvoId(aiResponse.data.convoId);
       playBuffer(aiResponse.data.voice);
     }
   }, [aiResponse.data]);
-
-  useEffect(() => {
-    void updateTokens();
-  }, [chatTokens]);
 
   //This one is tricky because if we don't wait for parentId to change, we can skip the beginning of the convo by not using the updated value
   useEffect(() => {
@@ -209,7 +204,7 @@ const Chat: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="fixed h-full w-full bg-gradient-to-b from-[#1b1b1b] to-[#020e18]">
-        {tokensLoading ? (
+        {tokensLoading || !chatTokens ? (
           <Circles
             height="150"
             width="150"
@@ -222,10 +217,14 @@ const Chat: NextPage = () => {
         ) : (
           <>
             <div className="relative flex h-full flex-col items-center gap-2 rounded-lg border px-4 py-4 text-slate-200 md:mx-auto md:w-1/2">
-              <div className="absolute top-0 left-0 m-2 rounded-lg bg-zinc-800 p-1 text-center 2xl:my-8 2xl:mx-16 2xl:scale-150 md:p-2">
+              <div className="absolute top-0 left-0 m-2 rounded-lg bg-zinc-800 p-1 text-center md:p-2 2xl:my-8 2xl:mx-16 2xl:scale-150">
                 <h4 className="scale-90 text-xs">{sessionData.user?.name}</h4>
                 <h4 className="scale-75 text-xs">
-                  {chatTokens ? `Tokens : ${chatTokens}` : "Calculating..."}
+                  {chatTokens
+                    ? `Tokens : ${
+                        updatedTokens?.chatTokens || tokens?.chatTokens || ""
+                      }`
+                    : "Calculating..."}
                 </h4>
                 <Image
                   className="m-auto w-8 rounded-full"
@@ -303,7 +302,7 @@ const Chat: NextPage = () => {
                   </select>
                 </div>
               </div>
-              {tokens && tokens.chatTokens >= MINIMUM_CHAT_TOKENS ? (
+              {(chatTokens as number) >= MINIMUM_CHAT_TOKENS ? (
                 <button
                   className={`flex items-center justify-center rounded-lg border py-2 px-4 hover:bg-violet-900 disabled:opacity-25 disabled:hover:bg-transparent ${
                     isRecording ? "border-red-600" : ""
@@ -324,42 +323,42 @@ const Chat: NextPage = () => {
                   Developer. (Minimum {MINIMUM_CHAT_TOKENS})
                 </h3>
               )}
-              <div className="my-2 w-5/6 overflow-y-auto rounded-lg text-sm md:text-base">
-                {messageHistory.map((m, i) => (
-                  <div key={i} className="flex">
-                    <h2 className="w-12 p-1 ">{m[0]}</h2>
-                    <div
-                      className={`my-1 w-full whitespace-pre-wrap rounded-lg bg-opacity-25 px-6 text-left font-montserrat ${
-                        m[0] === Chatter.HUMAN
-                          ? "bg-cyan-custom"
-                          : "bg-cyan-900"
-                      }`}
-                      key={i}
-                    >
-                      {m[1]}
-                    </div>
-                  </div>
-                ))}
-                {aiResponse.isLoading && (
-                  <div className="flex">
-                    <h2 className="w-12 p-1">AI</h2>
-                    <div className="my-1 w-full rounded-lg bg-cyan-900 bg-opacity-25 px-12">
-                      <ThreeDots
-                        height="20"
-                        width="20"
-                        radius="9"
-                        color="#4fa94d"
-                        ariaLabel="three-dots-loading"
-                        wrapperStyle={{}}
-                        visible={true}
-                      />
-                    </div>
-                  </div>
-                )}
-                <div ref={scrollBottomRef}></div>
-              </div>
-              {tokens && tokens.chatTokens >= MINIMUM_CHAT_TOKENS && (
+              {(chatTokens as number) >= MINIMUM_CHAT_TOKENS && (
                 <>
+                  <div className="my-2 w-5/6 overflow-y-auto rounded-lg text-sm md:text-base">
+                    {messageHistory.map((m, i) => (
+                      <div key={i} className="flex">
+                        <h2 className="w-12 p-1 ">{m[0]}</h2>
+                        <div
+                          className={`my-1 w-full whitespace-pre-wrap rounded-lg bg-opacity-25 px-6 text-left font-montserrat ${
+                            m[0] === Chatter.HUMAN
+                              ? "bg-cyan-custom"
+                              : "bg-cyan-900"
+                          }`}
+                          key={i}
+                        >
+                          {m[1]}
+                        </div>
+                      </div>
+                    ))}
+                    {aiResponse.isLoading && (
+                      <div className="flex">
+                        <h2 className="w-12 p-1">AI</h2>
+                        <div className="my-1 w-full rounded-lg bg-cyan-900 bg-opacity-25 px-12">
+                          <ThreeDots
+                            height="20"
+                            width="20"
+                            radius="9"
+                            color="#4fa94d"
+                            ariaLabel="three-dots-loading"
+                            wrapperStyle={{}}
+                            visible={true}
+                          />
+                        </div>
+                      </div>
+                    )}
+                    <div ref={scrollBottomRef}></div>
+                  </div>
                   <textarea
                     className="mt-auto h-12 w-5/6 resize-none rounded-lg border bg-transparent p-2 text-sm md:h-20"
                     placeholder="Enter your prompt..."
