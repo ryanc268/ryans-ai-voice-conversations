@@ -21,6 +21,7 @@
     "@trpc/react-query": "^10.9.0",
     "@trpc/server": "^10.9.0",
     "chatgpt": "^5.0.7",
+    "framer-motion": "^10.2.3",
     "microsoft-cognitiveservices-speech-sdk": "^1.25.1",
     "next": "^13.2.1",
     "next-auth": "^4.19.0",
