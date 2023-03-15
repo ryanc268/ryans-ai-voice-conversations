@@ -1,3 +1,11 @@
+# Ryans AI Voice Convos App
+
+## Privacy
+
+This app does not attempt to access or store any sensitive data. It will only ask for Authorization on Sign-Up to limit AI usage using an in-house token system attached to your user
+
+It will clearly define what it's asking to access to identify you as a user when you decide to choose a method of Authorization (Discord, Google, etc)
+
 # Create T3 App
 
 This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
