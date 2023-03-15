@@ -55,7 +55,7 @@ model User {
     email         String?   @unique
     emailVerified DateTime?
     image         String?
-    chatTokens    Int       @default(0)
+    chatTokens    Int       @default(1500)
     accounts      Account[]
     sessions      Session[]
 }
