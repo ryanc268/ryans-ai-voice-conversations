@@ -14,6 +14,7 @@ import { AIaus, AIeu, AIna, AIRegion, Chatter } from "~/utils/enums";
 import ErrorPage from "./error";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { type HistoryMessage } from "~/utils/interfaces";
 
 const Chat: NextPage = () => {
   const TEXTAREA_COLS = 100;
@@ -34,8 +35,7 @@ const Chat: NextPage = () => {
   const [voiceType, setVoiceType] = useState<string>("en-US-DavisNeural");
   const [chatTokens, setChatTokens] = useState<number>();
 
-  // TODO: Add tokens used per response?
-  const [messageHistory, setMessageHistory] = useState<[Chatter, string][]>([]);
+  const [messageHistory, setMessageHistory] = useState<HistoryMessage[]>([]);
 
   const [isRecording, setIsRecording] = useState<boolean>();
 
@@ -62,7 +62,10 @@ const Chat: NextPage = () => {
   );
 
   const sendData = async (voiceMessage?: string) => {
-    setMessageHistory((m) => [...m, [Chatter.HUMAN, voiceMessage || message]]);
+    setMessageHistory((m) => [
+      ...m,
+      { chatter: Chatter.HUMAN, message: voiceMessage || message },
+    ]);
     await aiResponse.mutateAsync({
       text: voiceMessage || message,
       parentId,
@@ -168,7 +171,14 @@ const Chat: NextPage = () => {
   useEffect(() => {
     if (aiResponse.data) {
       setChatTokens((m) => (m as number) - aiResponse.data.tokensUsed);
-      setMessageHistory((m) => [...m, [Chatter.AI, aiResponse.data.text]]);
+      setMessageHistory((m) => [
+        ...m,
+        {
+          chatter: Chatter.AI,
+          message: aiResponse.data.text,
+          tokens: aiResponse.data.tokensUsed,
+        },
+      ]);
       setParentId(aiResponse.data.parentId);
       setConvoId(aiResponse.data.convoId);
       playBuffer(aiResponse.data.voice);
@@ -325,20 +335,28 @@ const Chat: NextPage = () => {
               )}
               {chatTokens >= MINIMUM_CHAT_TOKENS && (
                 <>
+                  <div className="flex w-5/6 justify-between md:text-lg">
+                    <h2 className="">Chatter</h2>
+                    <h2 className="">Message</h2>
+                    <h2 className="">Tokens</h2>
+                  </div>
                   <div className="my-2 w-5/6 overflow-y-auto rounded-lg text-sm md:text-base">
-                    {messageHistory.map((m, i) => (
-                      <div key={i} className="flex">
-                        <h2 className="w-12 p-1 ">{m[0]}</h2>
+                    {messageHistory.map((h, i) => (
+                      <div key={i} className="relative flex">
+                        <h2 className="w-12 p-1">{h.chatter}</h2>
                         <div
-                          className={`my-1 w-full whitespace-pre-wrap rounded-lg bg-opacity-25 px-6 text-left font-montserrat ${
-                            m[0] === Chatter.HUMAN
+                          className={`my-1 w-full whitespace-pre-wrap rounded-lg bg-opacity-25 pl-6 pr-12 text-left font-montserrat ${
+                            h.chatter === Chatter.HUMAN
                               ? "bg-cyan-custom"
                               : "bg-cyan-900"
                           }`}
                           key={i}
                         >
-                          {m[1]}
+                          {h.message}
                         </div>
+                        {h.chatter === Chatter.AI && (
+                          <h2 className="absolute right-0 p-1">{h.tokens}</h2>
+                        )}
                       </div>
                     ))}
                     {aiResponse.isLoading && (

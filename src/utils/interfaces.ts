@@ -1,3 +1,5 @@
+import { type Chatter } from "./enums";
+
 export interface GPTConvo {
   text: string;
   tokensUsed: number;
@@ -19,5 +21,11 @@ export interface GPTDetail {
   created: Date;
   model: string;
   choices: unknown[];
-  usage: GPTUsage
+  usage: GPTUsage;
+}
+
+export interface HistoryMessage {
+  chatter: Chatter;
+  message: string;
+  tokens?: number;
 }
