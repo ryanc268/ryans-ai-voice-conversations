@@ -335,11 +335,13 @@ const Chat: NextPage = () => {
               )}
               {chatTokens >= MINIMUM_CHAT_TOKENS && (
                 <>
-                  <div className="flex w-5/6 justify-between md:text-lg">
-                    <h2 className="">Chatter</h2>
-                    <h2 className="">Message</h2>
-                    <h2 className="">Tokens</h2>
-                  </div>
+                  {messageHistory.length > 0 && (
+                    <div className="flex w-5/6 justify-between md:text-lg">
+                      <h2 className="">Chatter</h2>
+                      <h2 className="">Message</h2>
+                      <h2 className="">Tokens</h2>
+                    </div>
+                  )}
                   <div className="my-2 w-5/6 overflow-y-auto rounded-lg text-sm md:text-base">
                     {messageHistory.map((h, i) => (
                       <div key={i} className="relative flex">
