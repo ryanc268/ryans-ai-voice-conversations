@@ -7,6 +7,8 @@ import { type GPTDetail, type GPTConvo } from "~/utils/interfaces";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import { TRPCError } from "@trpc/server";
+import { logWithUTCDate } from "~/utils/dateUtil";
+import { LogLevel } from "~/utils/enums";
 
 const API = new ChatGPTAPI({
   apiKey: process.env.OPENAI_API_KEY as string,
@@ -14,7 +16,7 @@ const API = new ChatGPTAPI({
 
 const ratelimit = new Ratelimit({
   redis: Redis.fromEnv(),
-  limiter: Ratelimit.slidingWindow(0, "5 s"),
+  limiter: Ratelimit.slidingWindow(2, "10 s"),
   analytics: true,
 });
 
@@ -32,7 +34,13 @@ export const aiResponseRouter = createTRPCRouter({
       const userId = ctx.session.user.id;
       const { success: rateLimitOk } = await ratelimit.limit(userId);
 
-      if (!rateLimitOk) throw new TRPCError({ code: "TOO_MANY_REQUESTS" });
+      if (!rateLimitOk) {
+        logWithUTCDate(
+          `Rate Limit Exceeded For userId: ${userId}`,
+          LogLevel.ERROR
+        );
+        throw new TRPCError({ code: "TOO_MANY_REQUESTS" });
+      }
 
       return fetchResponse(input);
     }),

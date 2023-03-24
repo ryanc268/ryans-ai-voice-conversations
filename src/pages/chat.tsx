@@ -47,9 +47,20 @@ const Chat: NextPage = () => {
   const aiResponse = api.response.respond.useMutation({
     onError: (e) => {
       if (e.data?.code === "TOO_MANY_REQUESTS") {
-        toast.error("Rate Limit Exceeded");
+        toast.error("Rate Limit Exceeded", {
+          style: {
+            background: "#333",
+            color: "#fff",
+          },
+        });
       } else {
-        toast.error("Unexpected Error Occurred");
+        toast.error("Unexpected Error Occurred", {
+          icon: "👏",
+          style: {
+            background: "#333",
+            color: "#fff",
+          },
+        });
       }
     },
   });

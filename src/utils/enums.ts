@@ -67,3 +67,10 @@ export enum AIRegion {
   AUSTRALIA = "AUS",
   EUROPE = "EU",
 }
+
+export enum LogLevel {
+  INFO = "INFO",
+  DEBUG = "DEBUG",
+  WARN = "WARN",
+  ERROR = "ERROR",
+}
