@@ -31,6 +31,8 @@ const server = z.object({
   OPENAI_API_KEY: z.string(),
   SPEECH_KEY: z.string(),
   SPEECH_REGION: z.string(),
+  UPSTASH_REDIS_REST_URL: z.string(),
+  UPSTASH_REDIS_REST_TOKEN: z.string(),
 });
 
 /**
@@ -66,6 +68,8 @@ const processEnv = {
   OPENAI_API_KEY: process.env.OPENAI_API_KEY,
   SPEECH_KEY: process.env.SPEECH_KEY,
   SPEECH_REGION: process.env.SPEECH_REGION,
+  UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
+  UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
   NEXT_PUBLIC_SPEECH_KEY: process.env.NEXT_PUBLIC_SPEECH_KEY,
   NEXT_PUBLIC_SPEECH_REGION: process.env.NEXT_PUBLIC_SPEECH_REGION,
   // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,

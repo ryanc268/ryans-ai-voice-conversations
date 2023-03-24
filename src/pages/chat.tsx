@@ -15,6 +15,7 @@ import ErrorPage from "./error";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { type HistoryMessage } from "~/utils/interfaces";
+import toast from "react-hot-toast";
 
 const Chat: NextPage = () => {
   const TEXTAREA_COLS = 100;
@@ -43,7 +44,15 @@ const Chat: NextPage = () => {
 
   const scrollBottomRef = useRef<HTMLDivElement | null>(null);
 
-  const aiResponse = api.response.respond.useMutation();
+  const aiResponse = api.response.respond.useMutation({
+    onError: (e) => {
+      if (e.data?.code === "TOO_MANY_REQUESTS") {
+        toast.error("Rate Limit Exceeded");
+      } else {
+        toast.error("Unexpected Error Occurred");
+      }
+    },
+  });
 
   const { data: sessionData } = useSession();
 

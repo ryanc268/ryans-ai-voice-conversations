@@ -2,15 +2,24 @@ import { z } from "zod";
 import { ChatGPTAPI } from "chatgpt";
 import * as sdk from "microsoft-cognitiveservices-speech-sdk";
 
-import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { type GPTDetail, type GPTConvo } from "~/utils/interfaces";
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
+import { TRPCError } from "@trpc/server";
 
 const API = new ChatGPTAPI({
   apiKey: process.env.OPENAI_API_KEY as string,
 });
 
+const ratelimit = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(0, "5 s"),
+  analytics: true,
+});
+
 export const aiResponseRouter = createTRPCRouter({
-  respond: publicProcedure
+  respond: protectedProcedure
     .input(
       z.object({
         text: z.string().min(1),
@@ -19,7 +28,12 @@ export const aiResponseRouter = createTRPCRouter({
         voiceType: z.string(),
       })
     )
-    .mutation(({ input }) => {
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+      const { success: rateLimitOk } = await ratelimit.limit(userId);
+
+      if (!rateLimitOk) throw new TRPCError({ code: "TOO_MANY_REQUESTS" });
+
       return fetchResponse(input);
     }),
 });
